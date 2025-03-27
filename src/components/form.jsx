@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase";
 import EmojiPicker from "emoji-picker-react";
@@ -9,9 +9,29 @@ const Form = ({ user, room }) => {
   const emojiPickerRef = useRef(null);
   const buttonRef = useRef(null);
 
+  // emoji picker alanının dışarısına tıklanınca modalı kapat
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        isOpen &&
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(e.target) &&
+        !buttonRef.current.contains(e.target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
   // form gönderilince
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // formu temizle
+    setText("");
+    setIsOpen(false);
 
     // mesajın kaydedileceği kolleksiyonun referansını al
     const collectionRef = collection(db, "messages");
@@ -27,9 +47,6 @@ const Form = ({ user, room }) => {
       },
       createdAt: serverTimestamp(),
     });
-
-    // formu temizle
-    setText("");
   };
 
   // inputtaki seçili alana emoji ekle

@@ -11,6 +11,7 @@ const List = ({ room }) => {
   const lastMessageRef = useRef(null);
   const containerRef = useRef(null);
   const prevMessagesLength = useRef(0);
+  const audioRef = useRef(new Audio("/notify.mp3"));
 
   // veritabanından mesajları al
   useEffect(() => {
@@ -50,6 +51,8 @@ const List = ({ room }) => {
         // eğer son mesajı göneren kullanıcı kendisi değilse
         if (lastMsg.author.id !== auth.currentUser.uid) {
           setUnreadCount((prev) => prev + 1);
+          // yukarıdakyen yeni mesaj gelince bildirim sesi
+          playSound();
         }
       }
 
@@ -61,6 +64,9 @@ const List = ({ room }) => {
       } else if (isAtBottom) {
         // eğer son mesajı farklı kullanıcı attıysa kullanıcı aşşağıdaysa kaydır
         scrollToBottom();
+
+        // eğer aşşağıdayken başkasından mesaj gelirse bildirim
+        playSound();
       }
     }
   }, [messages]);
@@ -82,6 +88,12 @@ const List = ({ room }) => {
 
     // okunmayan mesaj sayısını sıfırla
     setUnreadCount(0);
+  };
+
+  // bidlirim seini oynat
+  const playSound = () => {
+    audioRef.current.currentTime = 0;
+    audioRef.current.play();
   };
 
   return (
